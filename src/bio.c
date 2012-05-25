@@ -162,6 +162,16 @@ unsigned long long bioPendingJobsOfType(int type) {
     return val;
 }
 
+/* Return the total number of pending jobs of any type. */
+unsigned long long bioPendingJobs(void) {
+    unsigned long long val = 0;
+    int j;
+
+    for (j = 0; j < REDIS_BIO_NUM_OPS; j++)
+        val += bioPendingJobsOfType(j);
+    return val;
+}
+
 #if 0 /* We don't use the following code for now, and bioWaitPendingJobsLE
          probably needs a rewrite using conditional variables instead of the
          current implementation. */

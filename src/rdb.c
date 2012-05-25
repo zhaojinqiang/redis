@@ -2,6 +2,7 @@
 #include "lzf.h"    /* LZF compression library */
 #include "zipmap.h"
 #include "endianconv.h"
+#include "bio.h"
 
 #include <math.h>
 #include <sys/types.h>
@@ -687,10 +688,11 @@ int rdbSaveBackground(char *filename) {
     long long start;
 
     if (server.rdb_child_pid != -1) return REDIS_ERR;
-
     server.dirty_before_bgsave = server.dirty;
-
     start = ustime();
+
+    /* Make sure there are no threads in critical sections while forking. */
+    while (bioPendingJobs()) usleep(1000);
     if ((childpid = fork()) == 0) {
         int retval;
 

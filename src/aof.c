@@ -918,6 +918,9 @@ int rewriteAppendOnlyFileBackground(void) {
 
     if (server.aof_child_pid != -1) return REDIS_ERR;
     start = ustime();
+
+    /* Make sure there are no threads in critical sections while forking. */
+    while (bioPendingJobs()) usleep(1000);
     if ((childpid = fork()) == 0) {
         char tmpfile[256];
 
